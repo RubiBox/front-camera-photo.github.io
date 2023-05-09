@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <title>Front Camera Example</title>
+    <script>const videoElement = document.getElementById("camera-feed");
+const canvasElement = document.getElementById("photo-canvas");
+const captureButton = document.getElementById("capture-button");
+
+// Access front camera
+navigator.mediaDevices.getUserMedia({ video: { facingMode: "user" } })
+  .then(stream => {
+    videoElement.srcObject = stream;
+  })
+  .catch(error => {
+    console.error("Error accessing camera:", error);
+  });
+
+// Capture photo on button click
+captureButton.addEventListener("click", () => {
+  // Draw video frame on canvas
+  const context = canvasElement.getContext("2d");
+  context.drawImage(videoElement, 0, 0, canvasElement.width, canvasElement.height);
+
+  // Get image data URL from canvas
+  const imageData = canvasElement.toDataURL("image/png");
+
+  // Send image data to server to save file
+  fetch("save-photo.php", {
+    method: "POST",
+    body: imageData,
+    headers: {
+      "Content-Type": "application/x-www-form-urlencoded"
+    }
+  })
+  .then(response => {
+    console.log("Photo saved successfully!");
+  })
+  .catch(error => {
+    console.error("Error saving photo:", error);
+  });
+});
+</script>
+  </head>
+  <body>
+    <video id="camera-feed" autoplay></video>
+    <canvas id="photo-canvas"></canvas>
+    <button id="capture-button">Take Photo</button>
+    <script src="script.js"></script>
+  </body>
+</html>
